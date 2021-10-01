@@ -5,7 +5,7 @@ using UnityEngine;
 public class Movement : MonoBehaviour
 {
     public CharacterController controller;      //  Player controller reference
-    public float speed = 8.0f;                 //  Speed settings
+    public float maxSpeed = 8.0f;                 //  Speed settings
     public float worldGravity = 9.8f;          //  Gravity settings variable
     public float jumpHeight = 0.5f;
 
@@ -17,6 +17,7 @@ public class Movement : MonoBehaviour
     Vector3 velocity;               //  Vector that stores player speed
     bool b_onGround = true;
     bool b_closeToGround = true;    //  Is player close enough to ground to interact with it
+    float speed;
 
     void Start()
     {
@@ -40,6 +41,15 @@ public class Movement : MonoBehaviour
             velocity.y -= worldGravity * Time.deltaTime;    //  inreasing falling velocity
         }
 
+                ////    Sprint
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            speed = maxSpeed;
+            //some endurance checking here later
+        }
+        else
+            speed = 4f;
+
                 ////    Movement processing
         if(b_closeToGround)
         {
@@ -53,6 +63,10 @@ public class Movement : MonoBehaviour
                 Jump();
         }
 
+            
+
+
+        //! MOVEMENT CODE ABOVE THIS LINE !//
         controller.Move(velocity * Time.deltaTime);     //  Applying movement
     }
 

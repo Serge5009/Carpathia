@@ -1103,7 +1103,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 1285339423}
-  speed: 8
+  maxSpeed: 8
   worldGravity: 9.8
   jumpHeight: 0.5
   legs: {fileID: 92440682}
