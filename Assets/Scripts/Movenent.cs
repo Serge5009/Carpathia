@@ -14,7 +14,7 @@ public class Movenent : MonoBehaviour
     public LayerMask terrainMask;       //  Falling velocity resets only if touched the ground
 
     Vector3 velocity;
-    bool b_onGround;
+    bool b_onGround = true;
 
     void Start()
     {
@@ -23,8 +23,14 @@ public class Movenent : MonoBehaviour
 
     void Update()
     {
-        b_onGround = Physics.CheckSphere(legs.position, groundDistance, terrainMask);    //  Check is player on the ground
+                ////    Ground/Air state check
+        if(!b_onGround && Physics.CheckSphere(legs.position, groundDistance, terrainMask)) 
+            HitGround();    //  Called every time you land
 
+        if (b_onGround && !Physics.CheckSphere(legs.position, groundDistance, terrainMask))
+            LeaveGround();    //  Called every time you loose the ground
+
+                ////    Fall processing
         if (!b_onGround)    //  If player is in the air 
         {
             velocity.y -= worldGravity * Time.deltaTime;    //  inreasing falling velocity
@@ -32,9 +38,8 @@ public class Movenent : MonoBehaviour
 
             return; //  Stoping here to avoid mid air movement
         }
-        velocity.y = -1f;  //  Reseting the velocity to a small value (not a zero, othervise we never really reach the floor)
 
-
+                ////    Movement processing
         float x = Input.GetAxis("Horizontal");  //  Getting input
         float z = Input.GetAxis("Vertical");
 
@@ -43,12 +48,28 @@ public class Movenent : MonoBehaviour
         //  JUMP    //
         if (Input.GetButtonDown("Jump"))
         {
-       //     velocity.y = Mathf.Sqrt(jumpHeight * 2f * worldGravity);
+            velocity.y = Mathf.Sqrt(jumpHeight * 2f * worldGravity);
         }
 
         controller.Move(move * speed * Time.deltaTime); //  Applying horizontal movement
         controller.Move(velocity * Time.deltaTime);     //  Applying vertical movement
 
+
+    }
+
+    void HitGround()
+    {
+        b_onGround = true;  
+        velocity.y = -1f;   //  Reseting the velocity to a small value (not a zero, othervise we never really reach the floor)
+
+        //  Some fall damage & sound here:
+        //
+        //
+    }
+
+    void LeaveGround()
+    {
+        b_onGround = false;
 
     }
 }

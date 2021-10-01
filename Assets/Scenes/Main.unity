@@ -1011,7 +1011,7 @@ MonoBehaviour:
   controller: {fileID: 1285339423}
   speed: 12
   worldGravity: 9.81
-  jumpHeight: 30
+  jumpHeight: 1
   legs: {fileID: 92440682}
   groundDistance: 0.4
   terrainMask:
