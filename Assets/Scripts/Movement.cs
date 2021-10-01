@@ -2,19 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Movenent : MonoBehaviour
+public class Movement : MonoBehaviour
 {
     public CharacterController controller;      //  Player controller reference
-    public float speed = 12.0f;                 //  Speed settings
+    public float speed = 8.0f;                 //  Speed settings
     public float worldGravity = 9.8f;          //  Gravity settings variable
-    public float jumpHeight = 3f;
+    public float jumpHeight = 0.5f;
 
     public Transform legs;
-    public float groundDistance = 0.4f;     //  Distance to the surface to be considered as grounded
+    public float groundDistance = 0.3f;         //  Distance to the surface to be considered as grounded
+    public float groundInteractDistance = 0.5f; //  Distance to the surface to be able to interact with it
     public LayerMask terrainMask;       //  Falling velocity resets only if touched the ground
 
-    Vector3 velocity;
+    Vector3 velocity;               //  Vector that stores player speed
     bool b_onGround = true;
+    bool b_closeToGround = true;    //  Is player close enough to ground to interact with it
 
     void Start()
     {
@@ -30,33 +32,36 @@ public class Movenent : MonoBehaviour
         if (b_onGround && !Physics.CheckSphere(legs.position, groundDistance, terrainMask))
             LeaveGround();    //  Called every time you loose the ground
 
+        b_closeToGround = Physics.CheckSphere(legs.position, groundInteractDistance, terrainMask);
+
                 ////    Fall processing
         if (!b_onGround)    //  If player is in the air 
         {
             velocity.y -= worldGravity * Time.deltaTime;    //  inreasing falling velocity
-            controller.Move(velocity * Time.deltaTime);     //  Applying falling velocity
-
-            return; //  Stoping here to avoid mid air movement
         }
 
                 ////    Movement processing
-        float x = Input.GetAxis("Horizontal");  //  Getting input
-        float z = Input.GetAxis("Vertical");
-
-        Vector3 move = transform.right * x + transform.forward * z; //  Calculating horizontal movement
-
-        //  JUMP    //
-        if (Input.GetButtonDown("Jump"))
+        if(b_closeToGround)
         {
-            velocity.y = Mathf.Sqrt(jumpHeight * 2f * worldGravity);
+            float x = Input.GetAxis("Horizontal") * speed;  //  Getting input
+            float z = Input.GetAxis("Vertical") * speed;
+
+            velocity = transform.right * x + transform.up * velocity.y + transform.forward * z; //  Calculating horizontal movement
+
+            ////    Jump
+            if (Input.GetButtonDown("Jump"))
+                Jump();
         }
 
-        controller.Move(move * speed * Time.deltaTime); //  Applying horizontal movement
-        controller.Move(velocity * Time.deltaTime);     //  Applying vertical movement
-
-
+        controller.Move(velocity * Time.deltaTime);     //  Applying movement
     }
 
+
+
+    void Jump()
+    {
+        velocity.y = Mathf.Sqrt(jumpHeight * 2f * worldGravity);    //  Calculate velocity required to jump to the given height
+    }
     void HitGround()
     {
         b_onGround = true;  
@@ -70,6 +75,5 @@ public class Movenent : MonoBehaviour
     void LeaveGround()
     {
         b_onGround = false;
-
     }
 }
