@@ -90,4 +90,7 @@ public class Movement : MonoBehaviour
     {
         b_onGround = false;
     }
+
+    public float GetCurrentSpeed() { return speed; }
+
 }
