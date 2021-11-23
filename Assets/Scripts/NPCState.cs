@@ -5,11 +5,8 @@ using UnityEngine.AI;
 
 public class NPCState : MonoBehaviour
 {
-
-    public GameObject target;
     public GameObject debugSphere;
     NavMeshAgent agent;
-
 
     void Start()
     {
@@ -23,7 +20,7 @@ public class NPCState : MonoBehaviour
         //Pursue(target.transform.position);
         //Hide(target.transform.position);
         //Evade(target.transform.position);
-        Wander();
+        //Wander();
         //HideTo(target.transform.position);
         //HideBehind(target.transform.position);
 
@@ -56,50 +53,69 @@ public class NPCState : MonoBehaviour
     }
 
 
-    void Seek(Vector3 destination)   //  Will move towards the destination
+    public void Seek(GameObject OtherNPC)   //  Will move towards the destination
     {
-        //Vector3 destCoordinates = destination;
+        Vector3 destination = OtherNPC.transform.position;
+
+        Debug.DrawRay(transform.position, destination, Color.blue);    //  Debug
+        agent.SetDestination(destination);
+    }
+    public void Seek(Vector3 destination)   //  Overloaded
+    {
         Debug.DrawRay(transform.position, destination, Color.blue);    //  Debug
         agent.SetDestination(destination);
     }
 
-    void Flee(Vector3 destination)   //  Will move from the destination
+
+    public void Flee(GameObject OtherNPC)   //  Will move from the destination
+    {
+        Vector3 destination = OtherNPC.transform.position;
+
+        Vector3 destCoordinates = this.transform.position * 2 - destination;
+        Debug.DrawRay(transform.position, destination, Color.blue);    //  Debug
+        agent.SetDestination(destCoordinates);
+    }
+    public void Flee(Vector3 destination)   //  Overloaded
     {
         Vector3 destCoordinates = this.transform.position * 2 - destination;
         Debug.DrawRay(transform.position, destination, Color.blue);    //  Debug
         agent.SetDestination(destCoordinates);
     }
 
-    void Pursue(Vector3 destination)
+    public void Pursue(GameObject OtherNPC)
     {
+        Vector3 destination = OtherNPC.transform.position;
+
+
         Vector3 targetDir = destination - this.transform.position;
 
-        float relativeHeading = Vector3.Angle(this.transform.forward, this.transform.TransformVector(target.transform.forward));
+        float relativeHeading = Vector3.Angle(this.transform.forward, this.transform.TransformVector(OtherNPC.transform.forward));
         float toTarget = Vector3.Angle(this.transform.forward, this.transform.TransformVector(targetDir));
 
-        if ((toTarget > 90 && relativeHeading < 20) || target.GetComponent<Movement>().maxSpeed < 0.01f)    //  <Movement>().maxSpeed has to be changed with actual current speed!!!
+        if ((toTarget > 90 && relativeHeading < 20) || OtherNPC.GetComponent<Movement>().maxSpeed < 0.01f)    //  <Movement>().maxSpeed has to be changed with actual current speed!!!
         {
-            Seek(target.transform.position);
+            Seek(destination);
             return;
         }
 
-        float lookAhead = targetDir.magnitude / (agent.speed + target.GetComponent<Movement>().maxSpeed);
-        Seek(target.transform.position + target.transform.forward * lookAhead);
+        float lookAhead = targetDir.magnitude / (agent.speed + OtherNPC.GetComponent<Movement>().maxSpeed);
+        Seek(destination + OtherNPC.transform.forward * lookAhead);
     }
 
-    void Evade(Vector3 destination)
+    public void Evade(GameObject OtherNPC)
     {
+        Vector3 destination = OtherNPC.transform.position;
         Vector3 targetDir = destination - this.transform.position;
 
-        float lookAhead = targetDir.magnitude / (agent.speed + target.GetComponent<Movement>().maxSpeed);
-        Flee(destination + target.transform.forward * lookAhead);
+        float lookAhead = targetDir.magnitude / (agent.speed + OtherNPC.GetComponent<Movement>().maxSpeed);
+        Flee(destination + OtherNPC.transform.forward * lookAhead);
 
     }
 
     Vector3 wanderTarget = Vector3.zero;
     float wanderTimer = 0.0f;
     float wanderRechargeTime = 0.5f;
-    void Wander()
+    public void Wander()
     {
         wanderTimer += Time.deltaTime;
         if(wanderTimer < wanderRechargeTime)
@@ -124,8 +140,10 @@ public class NPCState : MonoBehaviour
         Seek(targetGlobal);
     }
 
-    void HideTo(Vector3 destination)
+    public void HideTo(GameObject OtherNPC)
     {
+        Vector3 destination = OtherNPC.transform.position;
+
         float dist = Mathf.Infinity;
         Vector3 chosenSpot = Vector3.zero;
 
@@ -147,8 +165,10 @@ public class NPCState : MonoBehaviour
         }
     }
 
-    void HideBehind(Vector3 destination)
+    public void HideBehind(GameObject OtherNPC)
     {
+        Vector3 destination = OtherNPC.transform.position;
+
         float dist = Mathf.Infinity;
         Vector3 chosenSpot = Vector3.zero;
         Vector3 chosenDir = Vector3.zero;
@@ -180,7 +200,7 @@ public class NPCState : MonoBehaviour
         Seek(info.point + chosenDir.normalized * 5);
     }
 
-    bool IsSpotted(GameObject observer)
+    public bool IsSpotted(GameObject observer)
     {
         Vector3 toAgent = transform.position - observer.transform.position;
         float lookingAngle = Vector3.Angle(observer.transform.forward, toAgent);
@@ -190,7 +210,7 @@ public class NPCState : MonoBehaviour
         return false;
     }
 
-    bool CanSeeTarget(GameObject destination)
+    public bool CanSeeTarget(GameObject destination)
     {
         RaycastHit raycastInfo;
         Vector3 rayToTarget = destination.transform.position - transform.position;
