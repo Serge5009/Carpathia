@@ -4,15 +4,18 @@ using UnityEngine;
 
 public class Deer : MonoBehaviour
 {
-    // Start is called before the first frame update
+    public GameObject target;
+    NPCState states;
+    NPCVision vision;
+
     void Start()
     {
-        
+        states = this.GetComponent<NPCState>();
+        vision = this.GetComponent<NPCVision>();
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        states.HideTo(target);
     }
 }

@@ -16,6 +16,15 @@ public class Bear : MonoBehaviour
 
     void Update()
     {
-        states.Wander();
+        if(vision.CanSee(target))
+        {
+            states.Pursue(target);
+            Debug.Log("Pursue(target)");
+        }
+        else
+        {
+            states.Wander();
+            Debug.Log("Wander()");
+        }
     }
 }

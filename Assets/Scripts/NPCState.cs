@@ -15,6 +15,8 @@ public class NPCState : MonoBehaviour
 
     void Update()
     {
+        Vector3 forward = transform.TransformDirection(Vector3.forward) * 10;
+        Debug.DrawRay(transform.position, forward, Color.green);
         //(target.transform.position);
         //Flee(target.transform.position);
         //Pursue(target.transform.position);
@@ -57,12 +59,12 @@ public class NPCState : MonoBehaviour
     {
         Vector3 destination = OtherNPC.transform.position;
 
-        Debug.DrawRay(transform.position, destination, Color.blue);    //  Debug
+        Debug.DrawRay(transform.position, destination - transform.position, Color.blue);    //  Debug
         agent.SetDestination(destination);
     }
     public void Seek(Vector3 destination)   //  Overloaded
     {
-        Debug.DrawRay(transform.position, destination, Color.blue);    //  Debug
+        Debug.DrawRay(transform.position, destination - transform.position, Color.blue);    //  Debug
         agent.SetDestination(destination);
     }
 
@@ -72,13 +74,15 @@ public class NPCState : MonoBehaviour
         Vector3 destination = OtherNPC.transform.position;
 
         Vector3 destCoordinates = this.transform.position * 2 - destination;
-        Debug.DrawRay(transform.position, destination, Color.blue);    //  Debug
+        Debug.DrawRay(transform.position, destination - transform.position, Color.red);    //  Debug
+        Debug.DrawRay(transform.position, destCoordinates - transform.position, Color.blue);    //  Debug
         agent.SetDestination(destCoordinates);
     }
     public void Flee(Vector3 destination)   //  Overloaded
     {
         Vector3 destCoordinates = this.transform.position * 2 - destination;
-        Debug.DrawRay(transform.position, destination, Color.blue);    //  Debug
+        Debug.DrawRay(transform.position, destination - transform.position, Color.red);    //  Debug
+        Debug.DrawRay(transform.position, destCoordinates - transform.position, Color.blue);    //  Debug
         agent.SetDestination(destCoordinates);
     }
 
@@ -92,13 +96,20 @@ public class NPCState : MonoBehaviour
         float relativeHeading = Vector3.Angle(this.transform.forward, this.transform.TransformVector(OtherNPC.transform.forward));
         float toTarget = Vector3.Angle(this.transform.forward, this.transform.TransformVector(targetDir));
 
-        if ((toTarget > 90 && relativeHeading < 20) || OtherNPC.GetComponent<Movement>().maxSpeed < 0.01f)    //  <Movement>().maxSpeed has to be changed with actual current speed!!!
+        float targetSpeed;
+        if (OtherNPC.tag == "Player")
+            targetSpeed = OtherNPC.GetComponent<Movement>().maxSpeed;
+        else
+            targetSpeed = OtherNPC.GetComponent<NavMeshAgent>().speed;
+
+
+        if ((toTarget > 90 && relativeHeading < 20) || targetSpeed < 0.01f)    //  <Movement>().maxSpeed has to be changed with actual current speed!!!
         {
             Seek(destination);
             return;
         }
 
-        float lookAhead = targetDir.magnitude / (agent.speed + OtherNPC.GetComponent<Movement>().maxSpeed);
+        float lookAhead = targetDir.magnitude / (agent.speed + targetSpeed);
         Seek(destination + OtherNPC.transform.forward * lookAhead);
     }
 
@@ -114,7 +125,7 @@ public class NPCState : MonoBehaviour
 
     Vector3 wanderTarget = Vector3.zero;
     float wanderTimer = 0.0f;
-    float wanderRechargeTime = 0.5f;
+    float wanderRechargeTime = 1.5f;
     public void Wander()
     {
         wanderTimer += Time.deltaTime;
@@ -161,8 +172,10 @@ public class NPCState : MonoBehaviour
                 chosenSpot = hidePos;
                 dist = Vector3.Distance(transform.position, hidePos);
             }
-            Seek(chosenSpot);       
         }
+        Debug.DrawRay(transform.position, chosenSpot - transform.position, Color.magenta);    //  Debug
+        Seek(chosenSpot);
+
     }
 
     public void HideBehind(GameObject OtherNPC)
