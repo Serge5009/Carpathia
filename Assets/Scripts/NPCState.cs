@@ -118,7 +118,8 @@ public class NPCState : MonoBehaviour
         Vector3 destination = OtherNPC.transform.position;
         Vector3 targetDir = destination - this.transform.position;
 
-        float lookAhead = targetDir.magnitude / (agent.speed + OtherNPC.GetComponent<Movement>().maxSpeed);
+        //float lookAhead = targetDir.magnitude / (agent.speed + OtherNPC.GetComponent<Movement>().maxSpeed);   //  for player
+        float lookAhead = targetDir.magnitude / (agent.speed + OtherNPC.GetComponent<NavMeshAgent>().speed);
         Flee(destination + OtherNPC.transform.forward * lookAhead);
 
     }
@@ -145,7 +146,7 @@ public class NPCState : MonoBehaviour
         wanderTarget *= wanderRadius;
         Vector3 targetGlobal = this.gameObject.transform.position + wanderTarget;
 
-        Debug.Log(targetGlobal);
+        //Debug.Log(targetGlobal);
         debugSphere.GetComponent<DebugSphere>().TeleportTo(targetGlobal);
 
         Seek(targetGlobal);
